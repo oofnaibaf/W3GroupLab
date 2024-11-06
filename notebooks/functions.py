@@ -19,7 +19,7 @@ def concatenate_eurostat_countries():
 
 
 #function to retrieve differenet dataframes from eurostat to prepare the data for visualization by melting
-def cleaning_eurostat_data_for_viz():
+def cleaning_eurostat_data_for_viz(eurostat_df):
     income_df = eurostat_df[eurostat_df.index == 'Income']
     housing_df = eurostat_df[eurostat_df.index == "Housing"]
     rental_df = eurostat_df[eurostat_df.index == "Rental"]
@@ -54,7 +54,7 @@ def clean_countries_numbeo():
 
 #countries = clean_countries()
 #one_bed_apt = countries[countries["Type"] == "1 bed apartment (rent)"]
-#ne_bed_apt_melted = one_bed_apt.melt(id_vars=["Type", "Country"], var_name="Year", value_name="Value")
+#one_bed_apt_melted = one_bed_apt.melt(id_vars=["Type", "Country"], var_name="Year", value_name="Value")
 #one_bed_apt_melted["Year"] = one_bed_apt_melted["Year"].astype(int)
 
 
