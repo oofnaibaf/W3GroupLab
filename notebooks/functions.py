@@ -100,3 +100,61 @@ def adding_minimum_wage(eurostat_df):
     return eurostat_df
     
 #eurostat_df = adding_minimum_wage(eurostat_df)
+
+#adjusting sheets with mortgages and adding mortgages to cities table
+def cleaning_mortgages():
+    mortgages = pd.read_excel("../data/raw/Apartment_buying_cost_over_time.xlsx", sheet_name=1)
+    mortgages.rename(columns={"Unnamed: 0": "Type", "2019 cost monthly": "2019", "2020 cost monthly": "2020", "2021 cost monthly": "2021","2022 cost monthly": "2022", "2023 cost monthly": "2023", "2024 cost monthly": "2024"  }, inplace=True) 
+    mortgages = mortgages.dropna().round(2)
+    cities_mortgages = pd.concat([cities, mortgages], ignore_index=True)
+    #replacing NaN values with city names
+    cities_mortgages.loc[[12,15],"City"] = "Lisbon"
+    cities_mortgages.loc[[13,16],"City"] = "Berlin"
+    cities_mortgages.loc[[14,17],"City"] = "Paris"
+    return cities_mortgages
+
+#cities_mortgages = cleaning_mortgages()
+#cities_mortgages
+
+# getting all important info together for further analysis
+def all_data_together_cities(countries, cities_mortgages):
+    # min_wage from countries table in the same sheet as cities
+    min_wage = countries[countries["Type"] == "Min wage (after tax)"]
+    # add min_wage to cities table with mortgages
+    final = pd.concat([cities_mortgages, min_wage], ignore_index=True)
+    #get rid of the column country, as it was in countries table
+    final.drop(columns=["Country"], inplace=True)
+    #replacing NaN values with city names 
+    final.loc[18, "City"] = "Lisbon"
+    final.loc[19, "City"] = "Berlin"
+    final.loc[20, "City"] = "Paris"
+    final.loc[[12,13,14], "Type"] = "Mortgage 1bed"
+    final.loc[[15,16,17], "Type"] = "Mortgage 3bed"
+    return final 
+
+#final = all_data_together_cities(countries, cities_mortgages)
+#final
+
+#function to get a table with percentage comparison
+def get_percentage_cities(final):
+    # Filter the data for each necessary category
+    cities_filtered = final[final['Type'].isin(['1 bed apartment (rent)', 'Mortgage 1bed', 'Av salary (after tax)', 'Min wage (after tax)'])]
+    cities_filtered.columns = cities_filtered.columns.str.strip()
+    cities_filtered = cities_filtered.melt(id_vars=["City", "Type"], var_name="Year", value_name="Value")
+
+
+    # Pivot the table to get separate columns for each Type within each City and Year
+    cities_pivot = cities_filtered.pivot_table(index=["City", "Year"], columns="Type", values="Value").reset_index()
+
+    # Calculate percentages
+    cities_pivot['% Avg Salary for Rent'] = (cities_pivot['1 bed apartment (rent)'] / cities_pivot['Av salary (after tax)']) * 100
+    cities_pivot['% Avg Salary for Mortgage'] = (cities_pivot['Mortgage 1bed'] / cities_pivot['Av salary (after tax)']) * 100
+    cities_pivot['% Min Wage for Rent'] = (cities_pivot['1 bed apartment (rent)'] / cities_pivot['Min wage (after tax)']) * 100
+    cities_pivot['% Min Wage for Mortgage'] = (cities_pivot['Mortgage 1bed'] / cities_pivot['Min wage (after tax)']) * 100
+
+    # Display the results
+    display_columns = ['City', 'Year', '% Avg Salary for Rent', '% Avg Salary for Mortgage', '% Min Wage for Rent', '% Min Wage for Mortgage']
+    return cities_pivot[display_columns]
+
+#display_data = get_percentage_cities(final)
+#display_data
