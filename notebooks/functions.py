@@ -81,3 +81,22 @@ def clean_cities():
 #melt for further work with charts 
 #lisbon_melted = df_lisbon.melt(id_vars=["Type", "City"], var_name="Year", value_name="Value")
 #lisbon_melted["Year"] = lisbon_melted["Year"].astype(int)
+
+#add minimum wage and multiply by 12 to get the yearly min_wage per country to eurostat data
+def adding_minimum_wage(eurostat_df):
+    min_wage = pd.read_excel("../data/raw/week_3_project_data.xlsx", sheet_name=3)
+    min_wage.index = ["Min Wage"] * len(min_wage)
+    min_wage_yr = min_wage.select_dtypes(include='number')
+
+    # Multiply only numeric columns by 12
+    min_wage_yr = min_wage_yr * 12
+
+    min_wage_yr['Unnamed: 0'] = min_wage['Unnamed: 0']
+
+    # Reorder columns to have 'Country' as the first column
+    min_wage_yr = min_wage_yr[['Unnamed: 0'] + [col for col in min_wage_yr.columns if col != 'Unnamed: 0']]
+    min_wage_yr.rename(columns={"Unnamed: 0": "Country"}, inplace=True) 
+    eurostat_df = pd.concat([eurostat_df, min_wage_yr])
+    return eurostat_df
+    
+eurostat_df = adding_minimum_wage(eurostat_df)
