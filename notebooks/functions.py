@@ -99,4 +99,4 @@ def adding_minimum_wage(eurostat_df):
     eurostat_df = pd.concat([eurostat_df, min_wage_yr])
     return eurostat_df
     
-eurostat_df = adding_minimum_wage(eurostat_df)
+#eurostat_df = adding_minimum_wage(eurostat_df)
